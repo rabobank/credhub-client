@@ -2,6 +2,7 @@ package credhub
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 
 	"github.com/cloudfoundry-community/go-uaa"
@@ -10,6 +11,13 @@ import (
 
 func newUaaClient(options *Options) (HttpClient, error) {
 	result := &uaaAuthenticatedClient{httpClient: &http.Client{}}
+	if options != nil && options.IgnoreSsl {
+		result.httpClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	}
 
 	// let's get the authentication server url
 	info, e := getJson[Info](result.httpClient, options.Url+"/info")
@@ -17,7 +25,7 @@ func newUaaClient(options *Options) (HttpClient, error) {
 		return nil, e
 	}
 
-	if result.uaaClient, e = uaa.New(info.AuthServer.Url, uaa.WithClientCredentials(options.Client, options.Secret, uaa.JSONWebToken)); e != nil {
+	if result.uaaClient, e = uaa.New(info.AuthServer.Url, uaa.WithClientCredentials(options.Client, options.Secret, uaa.JSONWebToken), uaa.WithSkipSSLValidation(options != nil && options.IgnoreSsl)); e != nil {
 		return nil, e
 	}
 

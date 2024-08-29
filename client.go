@@ -31,9 +31,10 @@ type Client interface {
 }
 
 type Options struct {
-	Url    string
-	Client string
-	Secret string
+	Url       string
+	Client    string
+	Secret    string
+	IgnoreSsl bool
 }
 
 func New(options *Options) (Client, error) {
