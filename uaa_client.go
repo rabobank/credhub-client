@@ -11,7 +11,7 @@ import (
 
 func newUaaClient(options *Options) (HttpClient, error) {
 	result := &uaaAuthenticatedClient{httpClient: &http.Client{}}
-	if options != nil && options.IgnoreSsl {
+	if options.IgnoreSsl {
 		result.httpClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
@@ -25,7 +25,12 @@ func newUaaClient(options *Options) (HttpClient, error) {
 		return nil, e
 	}
 
-	if result.uaaClient, e = uaa.New(info.AuthServer.Url, uaa.WithClientCredentials(options.Client, options.Secret, uaa.JSONWebToken), uaa.WithSkipSSLValidation(options != nil && options.IgnoreSsl)); e != nil {
+	uaaUrl := info.AuthServer.Url
+	if len(options.UaaUrl) > 0 {
+		uaaUrl = options.UaaUrl
+	}
+
+	if result.uaaClient, e = uaa.New(uaaUrl, uaa.WithClientCredentials(options.Client, options.Secret, uaa.JSONWebToken), uaa.WithSkipSSLValidation(options != nil && options.IgnoreSsl)); e != nil {
 		return nil, e
 	}
 

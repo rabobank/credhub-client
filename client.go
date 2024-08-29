@@ -32,6 +32,7 @@ type Client interface {
 
 type Options struct {
 	Url       string
+	UaaUrl    string
 	Client    string
 	Secret    string
 	IgnoreSsl bool
